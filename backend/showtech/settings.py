@@ -1,10 +1,9 @@
-
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 load_dotenv()
 
-# os.environ['ENV_VARIABLE'],
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -31,11 +30,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -69,8 +71,11 @@ WSGI_APPLICATION = 'showtech.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ['DB_NAME'],
+        'USER': os.environ['DB_USER'],
+        'PASSWORD': os.environ['DB_PASSWORD'],
+        'HOST': 'localhost'
     }
 }
 
@@ -110,8 +115,24 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'build/static') # for collecting the fronend build files
+]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static') # genera una carpeta static en nuestro directorio backend, para esos archivos, tambien de produccion
+
+BT_MERCHANT_ID = os.environ['BT_MERCHANT_ID']
+BT_PUBLIC_KEY = os.environ['BT_PUBLIC_KEY']
+BT_PRIVATE_KEY = os.environ['BT_PRIVATE_KEY']
+
+
+CORS_ALLOWED_ORIGINS = [
+    'http://localhost:3000', # Puerto de la aplicacion de React
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# os.environ['BT_PRIVATE_KEY'],
