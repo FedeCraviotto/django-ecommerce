@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { Navigate } from 'react-router-dom';
 import Layout from "../hoc/Layout";
+import DropIn from 'braintree-web-drop-in-react';
+import { Oval } from 'react-loader-spinner';
+import axios from 'axios';
 
 const Checkout = () => {
   const [formData, setFormData] = useState({
@@ -11,8 +15,19 @@ const Checkout = () => {
     state_province: "",
     postal_zip_code: "",
   });
+  const [clientToken, setClientToken] = useState(null)
+  
+  // Loader for the dropping UI
+  const [loading, setLoading] = useState(true)
+  // Loader for after clicking Place Order button 
+  const [processingOrder, setProcessingOrder] = useState(false)
   const [orderAttempted, setOrderAttempted] = useState(false);
-
+  // If  payment is successfull, we redirect to main page
+  const [success, setSuccess] = useState(false);
+  // Needed in this format corresponding the Dropping UI docs.
+  const [data, setData] = useState({
+    instance: {}
+  })
   const {
     first_name,
     email,
@@ -22,6 +37,28 @@ const Checkout = () => {
     state_province,
     postal_zip_code,
   } = formData;
+
+  useEffect(()=>{
+    const fetchData = async () => {
+      const config = {
+        headers: {
+          'Accept' : 'application/json',
+        }
+      }
+      try {
+        const res = await axios.get('http://localhost:8000/api/payment/generate-token', config)
+        if (res.status === 200) {
+          //It comes from the API View's Reponse, as res.data
+          setClientToken(res.data.token)
+          setLoading(false)
+          setProcessingOrder(false)
+        }
+      } catch (err) {
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const changeInputs = (e) =>
     setFormData({
@@ -33,6 +70,9 @@ const Checkout = () => {
   const buyItems = (e) => {
     e.preventDefault();
   };
+
+  // With replace set to true, if the user tries to navigate back, he won't be able. The list of links he had navigated won't show the Checkout page as a previous navigated site. replace={true} is commonly used for previous logins to checkouts -in order to not see the login page if back-navigating once logged-in. 
+  if(success) return <Navigate to='/thank-you' replace={true}/>
 
   return (
     <Layout title="Checkout" content="">
@@ -186,13 +226,57 @@ const Checkout = () => {
               </div>
             </div>
             <h3 className="mb-5 display-6">Payment Information</h3>
-            <button
-              className="btn btn-success btn-lg mt-5 shadow"
-              onClick={() => setOrderAttempted(true)}
-              type="submit"
-            >
-              Place Order
-            </button>
+            {
+              loading || clientToken === null ? (
+                <div className="d-flex justify-content-center align-items-center mt-5 mb-5">
+                  <Oval 
+                    color='#00bfff'
+                    width={50}
+                    height={50}
+                  />
+                </div>
+              ) : (
+                <DropIn 
+                  options={{
+                    authorization: clientToken,
+                    paypal: {
+                      // Lo va a guardar en nuestra vault como un payment Method
+                      flow:'vault'
+                    }
+                  }}
+                  onInstance={instance=> setData({instance : instance})}
+                />
+              )
+            }
+
+            {
+              processingOrder ? (
+                <div className="d-flex justify-content-center align-items-center mt-5 mb-5">
+                  <Oval
+                    color='#00bfff'
+                    width={50}
+                    height={50}
+                  />
+                </div>
+              ) : (
+                <div>
+                  {
+                    loading ? (
+                      <></>
+                    ) : (
+                      <button
+                        className="btn btn-success btn-lg mt-5 shadow"
+                        onClick={() => setOrderAttempted(true)}
+                        type="submit"
+                      >
+                        Place Order
+                      </button>
+                    )
+                  }
+                </div>
+              )
+            }
+            
           </form>
         </div>
         <div className="offset-1 col-6 ">ORDER DETAILS</div>

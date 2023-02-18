@@ -17,13 +17,19 @@ gateway = braintree.BraintreeGateway(
 class GenerateTokenView(APIView):
     def get(self, request, format=None):
         try:
-            client_token = gateway.client_token.generate()
+            client_token = gateway.client_token.generate({
+                'merchant_account_id': 'whatever'
+            })
             return Response(
                 {'token': client_token},
                 status=status.HTTP_200_OK
             )
-        except:
+        # We can use only 'exception' but we add the Type so as we can name an alias and then print the error.
+        except Exception as e:
+            print(e)
             return Response(
                 {'error': 'Something went wrong when retrieving Braintree token'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        # If credentials are OK, try login into braintree> Business: You can see your Merchant Account Id (!= from Merchant ID)
+        # So you can pass it as value like this (line 20): .generate({'merchant_account_id': <MAccID>})
