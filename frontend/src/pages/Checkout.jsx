@@ -46,7 +46,7 @@ const Checkout = () => {
         }
       }
       try {
-        const res = await axios.get('http://localhost:8000/api/payment/generate-token', config)
+        const res = await axios.get(`${process.env.REACT_APP_API_URL}/payment/generate-token`, config)
         if (res.status === 200) {
           //It comes from the API View's Reponse, as res.data
           setClientToken(res.data.token)
@@ -65,14 +65,58 @@ const Checkout = () => {
       ...formData,
       [e.target.name]: e.target.value.replace(/ /g, ""),
     }); // remove spaces on change, while the user types
-  const changeAddress = (e) =>
+  
+    const changeAddress = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
-  const buyItems = (e) => {
+  
+    const buyItems = async (e) => {
     e.preventDefault();
+    if (
+      first_name !== '' &&
+      email !== '' &&
+      street_address !== '' &&
+      city !== '' &&
+      country !== '' &&
+      state_province !== '' &&
+      postal_zip_code !== ''      
+    ) {
+      const config = {
+        headers : {
+          'Accept': 'application/json',
+          'Content-type': 'application/json'
+        }
+      };
+
+      let { nonce } = await data.instance.requestPaymentMethod();
+
+      setProcessingOrder(true);
+
+      const body = JSON.stringify({
+        first_name,
+        email,
+        street_address,
+        city,
+        country,
+        state_province,
+        postal_zip_code,
+        nonce
+      });
+
+      try {
+        const res = await axios.post(`${process.env.REACT_APP_API_URL}/payment/process-payment`, body, config);
+
+        if (res.status===201) setSuccess(true);
+
+      } catch (err) {
+        console.log(err);
+      }
+
+      setProcessingOrder(false);
+    }
   };
 
   // With replace set to true, if the user tries to navigate back, he won't be able. The list of links he had navigated won't show the Checkout page as a previous navigated site. replace={true} is commonly used for previous logins to checkouts -in order to not see the login page if back-navigating once logged-in. 
-  if(success) return <Navigate to='/thank-you' replace={true}/>
+  if(success) return <Navigate to='/redirect' replace={true}/>
 
   return (
     <Layout title="Checkout" content="">

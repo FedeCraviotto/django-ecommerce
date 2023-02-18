@@ -35,6 +35,8 @@ class GenerateTokenView(APIView):
         # If credentials are OK, try login into braintree> Business: You can see your Merchant Account Id (!= from Merchant ID)
         # So you can pass it as value like this (line 20): .generate({'merchant_account_id': <MAccID>})
 
+
+# Los customers se van a guardar en la Sandbox de BraintreeGateway, entrando a Vault. 
 class ProcessPaymentView(APIView):
     def post(self, request):
         try:
@@ -69,7 +71,7 @@ class ProcessPaymentView(APIView):
                 country_name = 'Uruguay'
                 country_code = 'UY'
             
-            total_amount = '80.00'
+            total_amount = '10.00'
             
             # Revisamos si el usuario existe en nuestra DB
             if Customer.objects.filter(email=email).exists():
