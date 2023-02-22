@@ -3,7 +3,7 @@ import braintree
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Customer
+from .models import Customer, Address
 
 #Con esto seteado podemos crear customers, addresses, paymentMethods
 gateway = braintree.BraintreeGateway(
@@ -124,11 +124,101 @@ class ProcessPaymentView(APIView):
                         {'error': 'Failed to create customer'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
+                    
+            #We check if the address the customer is passing already exists
+            if Address.objects.filter(
+                customer = customer,
+                street_address = street_address,
+                country = country,
+                city= city,
+                state_province = state_province,
+                postal_zip_code = postal_zip_code
+            ).exists():
+                address = Address.objects.get(
+                    customer = customer,
+                    street_address = street_address,
+                    country = country,
+                    city= city,
+                    state_province = state_province,
+                    postal_zip_code = postal_zip_code
+                )
+                #tomamos el address_id capurado anteriorment
+                address_id = address.address_id
+                # usamos nuestros datos para consultar en braintree
+                try:
+                    result = gateway.address.find(customer_id, address_id)
+                except:
+                    result = gateway.address.create({
+                        'customer_id' : customer_id,
+                        'first_name' : first_name,
+                        'street_address' : street_address,
+                        'locality' : city,
+                        'region': state_province,
+                        'postal_code' : postal_zip_code,
+                        'country_name' : country_name,
+                        'country_code_alpha2': country_code
+                    })
+                    
+                    if result.is_success:
+                        address_id = str(result.address.id)
+                        
+                        Address.objects.filter(
+                            customer = customer,
+                            street_address = street_address,
+                            country = country,
+                            city= city,
+                            state_province = state_province,
+                            postal_zip_code = postal_zip_code
+                        ).update(address_id=address_id)
+                    else:
+                        return Response(
+                            {'error': 'Invalid address'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+            else:
+                result = gateway.address.create({
+                    'customer_id' : customer_id,
+                    'first_name' : first_name,
+                    'street_address' : street_address,
+                    'locality' : city,
+                    'region': state_province,
+                    'postal_code' : postal_zip_code,
+                    'country_name' : country_name,
+                    'country_code_alpha2': country_code   
+                })
+
+                if result.is_success:
+                    address_id = str(result.address.id)
+                    Address.objects.create(
+                        customer = customer,
+                        address_id = address_id,
+                        street_address = street_address,
+                        city = city,
+                        country = country_name,
+                        state_province = state_province,
+                        postal_zip_code = postal_zip_code
+                    )
+                    
+                    address = Address.objects.get(
+                        customer = customer,
+                        address_id = address_id,
+                        street_address = street_address,
+                        city = city,
+                        country = country_name,
+                        state_province = state_province,
+                        postal_zip_code = postal_zip_code
+                    )
+                    
+                else:
+                    return Response(
+                        {'error': 'Failed to create address'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
             # Una vez que dio todo bien, que el usuario existe tanto en nuestra DB y como en Braintree
             # o en su defecto fue creado satisfactoriamente en una o en ambas, respondemos con un 201.
             # Recordar que el payment se guarda en Braintree
             return Response(
-                {'success': 'Created customer successfully'},
+                {'success': 'Created customer and address successfully'},
                 status=status.HTTP_201_CREATED
             )
         except:
