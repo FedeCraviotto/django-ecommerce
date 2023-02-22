@@ -3,7 +3,7 @@ import braintree
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Customer, Address
+from .models import Customer, Address, PaymentMethod, Order
 
 #Con esto seteado podemos crear customers, addresses, paymentMethods
 gateway = braintree.BraintreeGateway(
@@ -214,13 +214,69 @@ class ProcessPaymentView(APIView):
                         {'error': 'Failed to create address'},
                         status=status.HTTP_400_BAD_REQUEST
                     )
-            # Una vez que dio todo bien, que el usuario existe tanto en nuestra DB y como en Braintree
-            # o en su defecto fue creado satisfactoriamente en una o en ambas, respondemos con un 201.
-            # Recordar que el payment se guarda en Braintree
-            return Response(
-                {'success': 'Created customer and address successfully'},
+            
+            #Create payment method
+            result = gateway.payment_method.create({
+                'customer_id' : str(customer_id),
+                # Here, we can use billing_address also, but we would have to pass a lot of fields.
+                # Just using the address_id is an easier way
+                'billing_address_id' : address_id,
+                'payment_method_nonce' : nonce
+            })
+            
+            if result.is_success:
+                token = str(result.payment_method.token)
+                # Now, with the token, and the before-created address, we create the Payment Method in our Database
+                PaymentMethod.objects.create(
+                    customer=customer,
+                    billing_address = address,
+                    token = token
+                )
+                # We store the reference of this record for further usage
+                payment_method = PaymentMethod.objects.get(
+                    customer=customer,
+                    billing_address = address,
+                    token = token
+                )
+            # If the creation of this payment method in Braintree is not successfull, we respond
+            else: 
+                return Response(
+                    {'error':'Failed to create payment method in Braintree'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            #Transaction in Braintree
+            result = gateway.transaction.sale({
+                'customer' : str(customer_id),
+                'amount' : total_amount, # Hardcoded, in this case
+                'payment_method_token' : token,
+                'billing_address_id': address_id,
+                'shipping_address_id': address_id,
+                'options' : {
+                    'submit_for_settlement' : True
+                } 
+             })
+            
+            if result.is_success:
+                transaction_id = str(result.transaction.id) 
+                # Now we can create our order in DB
+                Order.objects.create(
+                    transaction_id = transaction_id,
+                    customer = customer,
+                    address = address,
+                    payment_method = payment_method
+                )
+                
+                return Response(
+                {'success': 'Transaction successful'},
                 status=status.HTTP_201_CREATED
             )
+            else:
+                return Response(
+                {'error': 'Failed to process transaction'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
         except:
             # Si no se pudo por X motivo, se arroja la excepcion
             return Response(

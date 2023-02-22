@@ -4,6 +4,7 @@ import Layout from "../hoc/Layout";
 import DropIn from 'braintree-web-drop-in-react';
 import { Oval } from 'react-loader-spinner';
 import axios from 'axios';
+import Headphones from '../assets/images/headphones.jpg';
 
 const Checkout = () => {
   const [formData, setFormData] = useState({
@@ -323,7 +324,27 @@ const Checkout = () => {
             
           </form>
         </div>
-        <div className="offset-1 col-6 ">ORDER DETAILS</div>
+
+        <div className="offset-1 col-6 ">
+          <h3 className="display-6 mb-5">Order Details:</h3>
+          <div className="row">
+            <div className="col-4">
+              <img 
+              className="img-fluid"
+              src={Headphones}
+              alt='Headphones'
+              />
+            </div>
+            <div className="offset-1 col-7 mt-3">
+              <p className="fs-5 lead">
+                Order Item: Blasting Dingleberry Headphones
+              </p>
+              <p className="lead fs-3">
+                <strong>Order Total: (USS)$10.00</strong>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
     </Layout>
   );
