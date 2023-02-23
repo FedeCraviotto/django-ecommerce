@@ -337,7 +337,7 @@ const Checkout = () => {
             </div>
             <div className="offset-1 col-7 mt-3">
               <p className="fs-5 lead">
-                Order Item: Blasting Dingleberry Headphones
+                Order Item: Blasting Blueberry Headphones
               </p>
               <p className="lead fs-3">
                 <strong>Order Total: (USS)$10.00</strong>
