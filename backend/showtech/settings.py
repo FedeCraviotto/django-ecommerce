@@ -50,7 +50,10 @@ ROOT_URLCONF = 'showtech.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'build')],
+        # No need any template directory.
+        # We will treat our Django backend as an strict API
+        # We apply Next.js for server-side rendering (instead of clients)
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
