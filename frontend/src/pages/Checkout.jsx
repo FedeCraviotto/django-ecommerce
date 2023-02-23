@@ -221,7 +221,7 @@ const Checkout = () => {
                     <option value="argentina">Argentina</option>
                     <option value="peru">Peru</option>
                     <option value="chile">Chile</option>
-                    <option value="brasil">Brasil</option>
+                    <option value="brazil">Brazil</option>
                     <option value="uruguay">Uruguay</option>
                   </select>
                   <div className="invalid-feedback">
