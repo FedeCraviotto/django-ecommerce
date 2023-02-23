@@ -27,7 +27,6 @@ class GenerateTokenView(APIView):
             )
         # We can use only 'exception' but we add the Type so as we can name an alias and then print the error.
         except Exception as e:
-            print(e)
             return Response(
                 {'error': 'Something went wrong when retrieving Braintree token'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
@@ -208,10 +207,7 @@ class ProcessPaymentView(APIView):
                         state_province = state_province,
                         postal_zip_code = postal_zip_code
                     )
-                    print('Tudu bein at 211')
                 else:
-                    print('Failed to create address')
-                    print(result)
                     return Response(
                         {'error': 'Failed to create address'},
                         status=status.HTTP_400_BAD_REQUEST
@@ -227,7 +223,6 @@ class ProcessPaymentView(APIView):
             })
             
             if result.is_success:
-                print('llegue a 229')
                 token = str(result.payment_method.token)
                 # Now, with the token, and the before-created address, we create the Payment Method in our Database
                 PaymentMethod.objects.create(
@@ -243,7 +238,6 @@ class ProcessPaymentView(APIView):
                 )
             # If the creation of this payment method in Braintree is not successfull, we respond
             else:
-                print(result)
                 return Response(
                     {'error':'Failed to create payment method in Braintree'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -262,7 +256,6 @@ class ProcessPaymentView(APIView):
              })
             
             if result.is_success:
-                print('263 OK')
                 transaction_id = str(result.transaction.id) 
                 # Now we can create our order in DB
                 Order.objects.create(
@@ -284,8 +277,6 @@ class ProcessPaymentView(APIView):
 
         except Exception as err:
             # Si no se pudo por X motivo, se arroja la excepcion
-            print('wtf')
-            print(err)
             return Response(
                 {'error': 'Something went wrong when processing your payment'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
