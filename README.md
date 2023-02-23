@@ -38,3 +38,22 @@ Testing Paypal.
 
 Go to developer.paypal ( !== Paypal | Paypal Business  )
 Testing Tools > Accounts > view/edit > Funding > And take the credit card number that shows there
+
+
+
+/// NEXT.JS Environment variables
+
+- creat an '.env.local' and set your environment variables. Name it as you prefer.
+- No need to 'REACT_APP' or 'NEXT_PUBLIC'...
+- Then, include then in the next next.config.js file:
+
+const nextConfig = {
+  env: {
+    API_URL: process.env.API_URL,
+  },
+  reactStrictMode: true,
+}
+module.exports = nextConfig
+
+- use them as process.env.YOUR_VARIABLE
+- Don't need to install dotenv, nor importing / initializing nothing
