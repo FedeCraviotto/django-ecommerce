@@ -117,9 +117,9 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'build/static') # for collecting the fronend build files
+    os.path.join(BASE_DIR, 'build/static')
 ]
-STATIC_ROOT = os.path.join(BASE_DIR, 'static') # genera una carpeta static en nuestro directorio backend, para esos archivos, tambien de produccion
+STATIC_ROOT = os.path.join(BASE_DIR, 'static') 
 
 BT_MERCHANT_ID = os.environ['BT_MERCHANT_ID']
 BT_PUBLIC_KEY = os.environ['BT_PUBLIC_KEY']
@@ -127,10 +127,7 @@ BT_PRIVATE_KEY = os.environ['BT_PRIVATE_KEY']
 
 
 CORS_ALLOWED_ORIGINS = [
-    'http://localhost:3000', # Puerto de la aplicacion de React
+    'http://localhost:3000',
 ]
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
