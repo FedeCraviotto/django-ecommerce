@@ -226,6 +226,7 @@ class ProcessPaymentView(APIView):
             
             # Create transaction
             result = gateway.transaction.sale({
+                'merchant_account_id' : settings.BT_MERCHANT_ACCOUNT_ID, # I estimate it will work. If not, put it manually
                 'customer_id' : str(customer_id),
                 'amount' : total_amount,
                 'payment_method_token' : token,
