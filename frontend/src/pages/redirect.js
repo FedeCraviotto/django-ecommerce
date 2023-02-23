@@ -1,6 +1,6 @@
 import Link from "next/link";
-import Layout from "../hoc/Layout";
-
+import Layout from '../hocs/Layout';
+// 4808885973399637
 const Redirect = () => {
   return (
     <Layout title='Success' content=''>

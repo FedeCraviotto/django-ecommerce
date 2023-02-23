@@ -106,7 +106,7 @@ const CheckoutPage = () => {
       });
 
       try {
-        const res = await axios.post(`${process.env._API_URL}/payment/process-payment`, body, config);
+        const res = await axios.post(`${process.env.API_URL}/payment/process-payment`, body, config);
 
         if (res.status===201) setSuccess(true);
 
