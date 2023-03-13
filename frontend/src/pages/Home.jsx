@@ -9,7 +9,7 @@ const Home = () => {
       <h1 className="display-4 mt-5/">Showtech</h1>
       <h2 className="fs-4 fw-light fst-italic mt-3">Cutting-edge tech assets & equipment</h2>
       <div className="mt-5 bg-light p-5 rounded shadow">
-        <h3 className="display-6">Blasting Dingleberry Headphones</h3>
+        <h3 className="display-6">Blasting Graspberry Headphones</h3>
         <p className="lead mt-3 mb-4">A sound experience far beyond your limits</p>
         <Link to='/checkout' className="btn btn-info shadow-sm">
           Buy this item
